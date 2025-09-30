@@ -79,4 +79,55 @@ except Exception as e:
 
 st.divider()
 
+# Events per supplier analysis
+st.subheader("📅 Events per Supplier")
+
+try:
+    # Fetch events_suppliers data
+    events_suppliers_df = fetch_table("events_suppliers")
+    
+    if not events_suppliers_df.empty:
+        # Count events per supplier
+        events_per_supplier = events_suppliers_df['supplier_id'].value_counts().reset_index()
+        events_per_supplier.columns = ['supplier_id', 'event_count']
+        
+        # Get status distribution for each supplier
+        status_distribution = events_suppliers_df.groupby(['supplier_id', 'status']).size().unstack(fill_value=0)
+        
+        # Create a bar chart
+        fig, ax = plt.subplots(figsize=(10, 6))
+        
+        # Plot each status as a stacked bar
+        if not status_distribution.empty:
+            status_distribution.plot(kind='bar', stacked=True, ax=ax,
+                                   color=['#4CAF50', '#2196F3', '#FFC107'],  # Same colors as pie chart
+                                   width=0.8)
+            
+            ax.set_xlabel('Supplier ID')
+            ax.set_ylabel('Number of Events')
+            ax.set_title('Events per Supplier by Status')
+            ax.legend(title='Status', bbox_to_anchor=(1.05, 1), loc='upper left')
+            plt.xticks(rotation=45, ha='right')
+            plt.tight_layout()
+            
+            st.pyplot(fig, use_container_width=True)
+            
+            # Show top 10 suppliers by event count
+            st.write("### Top 10 Suppliers by Event Count")
+            top_suppliers = events_suppliers_df.groupby('supplier_id').agg(
+                total_events=('event_id', 'count'),
+                statuses=('status', lambda x: x.value_counts().to_dict())
+            ).sort_values('total_events', ascending=False).head(10)
+            
+            st.dataframe(top_suppliers, use_container_width=True)
+        else:
+            st.warning("No status data available for events.")
+    else:
+        st.warning("No events data found.")
+        
+except Exception as e:
+    st.error(f"Error loading events data: {e}")
+
+st.divider()
+
 st.caption("In progress")
