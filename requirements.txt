@@ -7,3 +7,4 @@ google-generativeai
 pandas
 streamlit
 python-dotenv
+matplotlib
