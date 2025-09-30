@@ -1,0 +1,9 @@
+gunicorn
+uvicorn
+supabase
+fastapi
+openai
+google-generativeai
+pandas
+streamlit
+python-dotenv
